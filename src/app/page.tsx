@@ -1,65 +1,211 @@
-import Image from "next/image";
+// 'use client'
+
+// import { useState } from 'react'
+// import { talks } from '@/lib/mock-data'
+// import { TalkTopic } from '@/types'
+// import TalkCard from '@/components/TalkCard'
+// import { Button } from '@/components/ui/button'
+
+// const ALL_TOPICS: TalkTopic[] = ['Frontend', 'Backend', 'DevOps', 'AI/ML', 'Mobile']
+
+// export default function Home() {
+//   const [activeTopic, setActiveTopic] = useState<TalkTopic | null>(null)
+
+//   const filtered = activeTopic
+//     ? talks.filter((t) => t.topic === activeTopic)
+//     : talks
+
+//   return (
+//     <main className="min-h-screen bg-gray-50">
+//       <div className="max-w-6xl mx-auto px-4 py-10 sm:px-6 lg:px-8">
+
+//         {/* Header */}
+//         <div className="mb-8">
+//           <h1 className="text-3xl font-bold tracking-tight text-gray-900">TechTalks</h1>
+//           <p className="mt-1 text-muted-foreground">
+//             Browse and register for upcoming tech talks.
+//           </p>
+//         </div>
+
+//         {/* Topic filter */}
+//         <div className="flex flex-wrap gap-2 mb-8">
+//           <Button
+//             variant={activeTopic === null ? 'default' : 'outline'}
+//             size="sm"
+//             onClick={() => setActiveTopic(null)}
+//           >
+//             All
+//           </Button>
+//           {ALL_TOPICS.map((topic) => (
+//             <Button
+//               key={topic}
+//               variant={activeTopic === topic ? 'default' : 'outline'}
+//               size="sm"
+//               onClick={() => setActiveTopic(topic === activeTopic ? null : topic)}
+//             >
+//               {topic}
+//             </Button>
+//           ))}
+//         </div>
+
+//         {/* Results count */}
+//         <p className="text-sm text-muted-foreground mb-4">
+//           {filtered.length} talk{filtered.length !== 1 ? 's' : ''}
+//           {activeTopic ? ` in ${activeTopic}` : ''}
+//         </p>
+
+//         {/* Talk grid */}
+//         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+//           {filtered.map((talk) => (
+//             <TalkCard key={talk.id} talk={talk} />
+//           ))}
+//         </div>
+
+//         {filtered.length === 0 && (
+//           <p className="text-center text-muted-foreground py-16">
+//             No talks found for <strong>{activeTopic}</strong>.
+//           </p>
+//         )}
+//       </div>
+//     </main>
+//   )
+// }
+
+
+
+
+
+
+
+'use client'
+
+import { useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { fetchTalks } from '@/lib/mock-data'
+import { TalkTopic } from '@/types'
+import TalkCard from '@/components/TalkCard'
+import { Button } from '@/components/ui/button'
+import { Skeleton } from '@/components/ui/skeleton'
+import RegisterForm from '@/components/RegisterForm'
+
+const ALL_TOPICS: TalkTopic[] = ['Frontend', 'Backend', 'DevOps', 'AI/ML', 'Mobile']
+
+function TalkCardSkeleton() {
+  return (
+    <div className="rounded-xl border bg-card p-5 flex flex-col gap-4">
+      {/* Title + badge row */}
+      <div className="flex items-start justify-between gap-3">
+        <Skeleton className="h-5 w-3/4 rounded" />
+        <Skeleton className="h-5 w-16 rounded-full" />
+      </div>
+      {/* Speaker */}
+      <Skeleton className="h-4 w-1/3 rounded" />
+      {/* Description */}
+      <Skeleton className="h-4 w-full rounded" />
+      <Skeleton className="h-4 w-5/6 rounded" />
+      {/* Meta grid */}
+      <div className="grid grid-cols-2 gap-2 mt-2">
+        <Skeleton className="h-4 w-20 rounded" />
+        <Skeleton className="h-4 w-24 rounded" />
+        <Skeleton className="h-4 w-40 rounded col-span-2" />
+        <Skeleton className="h-4 w-36 rounded col-span-2" />
+      </div>
+    </div>
+  )
+}
 
 export default function Home() {
+  const [activeTopic, setActiveTopic] = useState<TalkTopic | null>(null)
+
+  const { data, isPending, isError, error } = useQuery({
+    queryKey: ['talks'],
+    queryFn: fetchTalks,
+  })
+
+  const filtered = activeTopic
+    ? (data ?? []).filter((t) => t.topic === activeTopic)
+    : (data ?? [])
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <main className="min-h-screen bg-gray-50">
+      <div className="max-w-6xl mx-auto px-4 py-10 sm:px-6 lg:px-8">
+
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold tracking-tight text-gray-900">TechTalks</h1>
+          <p className="mt-1 text-muted-foreground">
+            Browse and register for upcoming tech talks.
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+
+        {/* Topic filter — always visible so layout doesn't jump */}
+        <div className="flex flex-wrap gap-2 mb-8">
+          <Button
+            variant={activeTopic === null ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setActiveTopic(null)}
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+            All
+          </Button>
+          {ALL_TOPICS.map((topic) => (
+            <Button
+              key={topic}
+              variant={activeTopic === topic ? 'default' : 'outline'}
+              size="sm"
+              onClick={() => setActiveTopic(topic === activeTopic ? null : topic)}
+            >
+              {topic}
+            </Button>
+          ))}
         </div>
-      </main>
-    </div>
-  );
+
+        {/* Error banner */}
+        {isError && (
+          <div className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+            <strong className="font-semibold">Failed to load talks: </strong>
+            {error instanceof Error ? error.message : 'An unexpected error occurred.'}
+          </div>
+        )}
+
+        {/* Loading skeletons */}
+        {isPending && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <TalkCardSkeleton />
+            <TalkCardSkeleton />
+            <TalkCardSkeleton />
+          </div>
+        )}
+
+        {/* Talk grid */}
+        {!isPending && !isError && (
+          <>
+            <p className="text-sm text-muted-foreground mb-4">
+              {filtered.length} talk{filtered.length !== 1 ? 's' : ''}
+              {activeTopic ? ` in ${activeTopic}` : ''}
+            </p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filtered.map((talk) => (
+                <TalkCard key={talk.id} talk={talk} />
+              ))}
+            </div>
+
+            {filtered.length === 0 && (
+              <p className="text-center text-muted-foreground py-16">
+                No talks found for <strong>{activeTopic}</strong>.
+              </p>
+            )}
+          </>
+        )}
+
+        {/* test  */}
+        {/* {!isPending && !isError && (
+          <div className="mt-12">
+            <h2 className="text-xl font-semibold mb-4">Test Registration (Talk #1)</h2>
+            <RegisterForm talkId={1} />
+          </div>
+        )} */}
+      </div>
+    </main>
+  )
 }
